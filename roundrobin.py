@@ -1,3 +1,4 @@
+# we have written comments so our group memebers in collaboration and our instructor can understand our work better.
 import tkinter as tk
 from tkinter import ttk, messagebox
 from collections import deque
@@ -6,14 +7,14 @@ class RoundRobinApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Round Robin Scheduling Simulator")
-        self.root.geometry("800x600")
+        self.root.geometry("800x600") 
         
-        # Variables
+        
         self.processes = []
         self.time_quantum = tk.IntVar(value=2)
         self.execution_sequence = []
         
-        # Create UI
+       
         self.create_widgets()
         
     def create_widgets(self):
@@ -22,11 +23,11 @@ class RoundRobinApp:
         main_frame.pack(fill=tk.BOTH, expand=True)
         
         # Input frame
-        input_frame = ttk.LabelFrame(main_frame, text="Process Input", padding="10")
+        input_frame = ttk.LabelFrame(main_frame, text="Process Input", padding="15")
         input_frame.pack(fill=tk.X, pady=5)
         
         # Process table
-        self.tree = ttk.Treeview(input_frame, columns=('id', 'arrival', 'burst'), show='headings')
+        self.tree = ttk.Treeview(input_frame, columns=('id', 'arrival', 'burst'), show='headings')#table view
         self.tree.heading('id', text='Process ID')
         self.tree.heading('arrival', text='Arrival Time')
         self.tree.heading('burst', text='Burst Time')
@@ -54,7 +55,7 @@ class RoundRobinApp:
         remove_btn = ttk.Button(add_frame, text="Remove Selected", command=self.remove_process)
         remove_btn.pack(side=tk.LEFT)
         
-        # Time quantum input
+        
         quantum_frame = ttk.Frame(input_frame)
         quantum_frame.pack(fill=tk.X, pady=5)
         
@@ -62,7 +63,7 @@ class RoundRobinApp:
         quantum_entry = ttk.Entry(quantum_frame, textvariable=self.time_quantum, width=5)
         quantum_entry.pack(side=tk.LEFT, padx=5)
         
-        # Run button
+     
         run_btn = ttk.Button(input_frame, text="Run Simulation", command=self.run_simulation)
         run_btn.pack(pady=5)
         
@@ -92,7 +93,7 @@ class RoundRobinApp:
         self.avg_turnaround_label = ttk.Label(metrics_frame, text="0.00")
         self.avg_turnaround_label.pack(side=tk.LEFT, padx=5)
         
-        # Process details
+        #
         ttk.Label(results_frame, text="Process Details:").pack(anchor=tk.W)
         self.details_tree = ttk.Treeview(results_frame, columns=('id', 'arrival', 'burst', 'wait', 'turnaround'), show='headings')
         self.details_tree.heading('id', text='Process ID')
@@ -148,10 +149,9 @@ class RoundRobinApp:
                 messagebox.showerror("Error", "Time quantum must be > 0")
                 return
                 
-            # Run the round robin algorithm
             avg_wait, avg_turnaround, sequence = self.round_robin(self.processes, time_quantum)
             
-            # Update UI with results
+            
             self.display_results(avg_wait, avg_turnaround, sequence)
             
         except ValueError:
@@ -170,7 +170,7 @@ class RoundRobinApp:
         queue = deque()
         completed = 0
         
-        # Initialize queue with processes that have arrived at time 0
+       
         for i in range(n):
             if arrival_time[i] == 0:
                 queue.append(i)
@@ -178,7 +178,7 @@ class RoundRobinApp:
         while completed != n:
             if not queue:
                 current_time += 1
-                # Check for new arrivals
+                
                 for i in range(n):
                     if arrival_time[i] == current_time and i not in queue and remaining_time[i] > 0:
                         queue.append(i)
@@ -191,7 +191,7 @@ class RoundRobinApp:
             current_time += execution_time
             end_time = current_time
             
-            # Record execution for Gantt chart
+           
             gantt_data.append({
                 'process': processes[current_process][0],
                 'start': start_time,
@@ -200,28 +200,28 @@ class RoundRobinApp:
             
             execution_sequence.append(processes[current_process][0])
             
-            # Update waiting time for other processes in the queue
+            
             for i in range(n):
                 if i != current_process and remaining_time[i] > 0 and arrival_time[i] < current_time:
                     waiting_time[i] += execution_time
             
-            # Check for new arrivals during this execution
+           
             for i in range(n):
                 if arrival_time[i] <= current_time and i not in queue and remaining_time[i] > 0 and i != current_process:
                     queue.append(i)
             
-            # If process is not finished, add it back to the queue
+           
             if remaining_time[current_process] > 0:
                 queue.append(current_process)
             else:
                 completed += 1
                 turnaround_time[current_process] = current_time - arrival_time[current_process]
         
-        # Calculate average waiting and turnaround times
+       
         avg_waiting = sum(waiting_time) / n
         avg_turnaround = sum(turnaround_time) / n
         
-        # Prepare process details
+       
         process_details = []
         for i in range(n):
             process_details.append((
@@ -239,23 +239,23 @@ class RoundRobinApp:
         })
     
     def display_results(self, avg_wait, avg_turnaround, results):
-        # Clear previous results
+       
         self.sequence_text.delete(1.0, tk.END)
         self.gantt_canvas.delete("all")
         for item in self.details_tree.get_children():
             self.details_tree.delete(item)
         
-        # Display execution sequence
+        
         self.sequence_text.insert(tk.END, " → ".join(results['sequence']))
         
-        # Display Gantt chart
+        
         self.draw_gantt_chart(results['gantt'])
         
-        # Display metrics
+       
         self.avg_wait_label.config(text=f"{avg_wait:.2f}")
         self.avg_turnaround_label.config(text=f"{avg_turnaround:.2f}")
         
-        # Display process details
+        
         for detail in results['details']:
             self.details_tree.insert('', tk.END, values=detail)
     
@@ -267,7 +267,7 @@ class RoundRobinApp:
         canvas_width = canvas.winfo_width()
         canvas_height = canvas.winfo_height()
         
-        # Find maximum time for scaling
+        
         max_time = max(entry['end'] for entry in gantt_data)
         if max_time == 0:
             return
@@ -276,10 +276,10 @@ class RoundRobinApp:
         bar_height = 30
         y = (canvas_height - bar_height) / 2
         
-        # Draw timeline
+      
         canvas.create_line(20, y + bar_height + 10, canvas_width - 20, y + bar_height + 10, width=2)
         
-        # Draw each process execution
+   
         colors = ['#FF9999', '#99FF99', '#9999FF', '#FFCC99', '#CC99FF', '#99FFCC']
         color_index = 0
         
@@ -288,14 +288,14 @@ class RoundRobinApp:
             x2 = 20 + entry['end'] * scale
             width = x2 - x1
             
-            # Draw the process bar
+            
             color = colors[color_index % len(colors)]
             canvas.create_rectangle(x1, y, x2, y + bar_height, fill=color, outline='black')
             
-            # Add process label
+            
             canvas.create_text((x1 + x2)/2, y + bar_height/2, text=entry['process'])
             
-            # Add time labels
+           
             if i == 0:
                 canvas.create_text(x1, y + bar_height + 15, text=str(entry['start']))
             canvas.create_text(x2, y + bar_height + 15, text=str(entry['end']))
