@@ -9,6 +9,13 @@ class RoundRobinApp:
         self.root.geometry("900x700")
         self.root.configure(bg="#f0f8ff")
         
+        # Create a title label
+        title_frame = ttk.Frame(self.root)
+        title_frame.pack(fill=tk.X, pady=10)
+        title_label = ttk.Label(title_frame, text="Round Robin Scheduler Simulator", 
+                              font=('Segoe UI', 24, 'bold'))
+        title_label.pack(expand=True)  # This centers the label
+        
         self.style = ttk.Style()
         self.style.theme_use('clam')
         self.style.configure('.', background="#f0f8ff", foreground="#333333")
@@ -69,8 +76,15 @@ class RoundRobinApp:
         quantum_entry = ttk.Entry(quantum_frame, textvariable=self.time_quantum, width=5)
         quantum_entry.pack(side=tk.LEFT, padx=5)
         
-        run_btn = ttk.Button(input_frame, text="Run Simulation", command=self.run_simulation)
-        run_btn.pack(pady=5)
+        button_frame = ttk.Frame(input_frame)
+        button_frame.pack(fill=tk.X, pady=5)
+        
+        run_btn = ttk.Button(button_frame, text="Run Simulation", command=self.run_simulation)
+        run_btn.pack(side=tk.LEFT, padx=5)
+        
+        # Add Reset Button
+        reset_btn = ttk.Button(button_frame, text="Reset All", command=self.reset_all)
+        reset_btn.pack(side=tk.LEFT)
         
         results_frame = ttk.LabelFrame(main_frame, text="Simulation Results", padding="10")
         results_frame.pack(fill=tk.BOTH, expand=True, pady=5)
@@ -80,7 +94,7 @@ class RoundRobinApp:
         self.sequence_text.pack(fill=tk.X, pady=5)
         
         ttk.Label(results_frame, text="Gantt Chart:").pack(anchor=tk.W)
-        self.gantt_canvas = tk.Canvas(results_frame, height=100, bg='white', highlightthickness=0)
+        self.gantt_canvas = tk.Canvas(results_frame, height=120, bg='white', highlightthickness=0)
         self.gantt_canvas.pack(fill=tk.X, pady=5)
         
         metrics_frame = ttk.Frame(results_frame)
@@ -136,6 +150,27 @@ class RoundRobinApp:
             index = self.tree.index(item)
             del self.processes[index]
             self.tree.delete(item)
+    
+    def reset_all(self):
+        """Reset all inputs and results"""
+        self.processes = []
+        self.time_quantum.set(2)
+        self.execution_sequence = []
+        
+        # Clear all widgets
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+            
+        for item in self.details_tree.get_children():
+            self.details_tree.delete(item)
+            
+        self.id_entry.delete(0, tk.END)
+        self.arrival_entry.delete(0, tk.END)
+        self.burst_entry.delete(0, tk.END)
+        self.sequence_text.delete(1.0, tk.END)
+        self.gantt_canvas.delete("all")
+        self.avg_wait_label.config(text="0.00")
+        self.avg_turnaround_label.config(text="0.00")
     
     def run_simulation(self):
         if not self.processes:
@@ -255,9 +290,17 @@ class RoundRobinApp:
             
         scale = (canvas_width - 40) / max_time
         bar_height = 30
-        y = (canvas_height - bar_height) / 2
+        y = (canvas_height - bar_height) / 2 - 20
         
-        canvas.create_line(20, y + bar_height + 10, canvas_width - 20, y + bar_height + 10, width=2)
+        # Draw timeline at bottom
+        timeline_y = y + bar_height + 20
+        canvas.create_line(20, timeline_y, canvas_width - 20, timeline_y, width=2)
+        
+        # Draw vertical lines for each time unit
+        for t in range(0, max_time + 1):
+            x = 20 + t * scale
+            canvas.create_line(x, timeline_y, x, timeline_y + 5, width=1)
+            canvas.create_text(x, timeline_y + 10, text=str(t), anchor=tk.N)
         
         colors = ['#5cb3ff', '#0078d7', '#003366', '#4d94ff', '#1a66b3']
         color_index = 0
@@ -271,9 +314,9 @@ class RoundRobinApp:
             canvas.create_rectangle(x1, y, x2, y + bar_height, fill=color, outline='black')
             canvas.create_text((x1 + x2)/2, y + bar_height/2, text=entry['process'], fill="white")
             
-            if i == 0:
-                canvas.create_text(x1, y + bar_height + 15, text=str(entry['start']))
-            canvas.create_text(x2, y + bar_height + 15, text=str(entry['end']))
+            # Draw vertical divider lines
+            if i < len(gantt_data) - 1:
+                canvas.create_line(x2, y, x2, y + bar_height, fill='white')
             
             color_index += 1
 
